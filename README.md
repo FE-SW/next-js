@@ -160,6 +160,119 @@ export default function DashboardPage() {
   </body>
 </html>
 ```
+### 병렬 라우팅
+병렬 라우팅은 여러 개의 라우트를 동시에 로드하고 렌더링할 수 있는 기능이다. 이를 통해 서로 다른 레이아웃이나 페이지를 독립적으로 관리하면서도 동시에 표시할 수 있다. 이 방식은 복잡한 사용자 인터페이스를 구성할 때 유용하며, 다양한 상태를 동시에 보여줄 수 있다.
+병렬 라우팅은 대시보드와 같은 복잡한 인터페이스에서 유용하다. 예를 들어, 대시보드의 왼쪽 사이드바와 오른쪽 콘텐츠 영역을 독립적으로 로드하고 업데이트할 수 있다. 이를 통해 사용자 경험을 향상시키고, 각 부분의 상태를 개별적으로 관리할 수 있다.
+
+```javascript
+app/
+├── dashboard/
+│   ├── layout.js
+│   ├── sidebar/
+│   │   └── page.js
+│   └── content/
+│       └── page.js
+└── layout.js
+```
+
+```javascript
+//app/layout.js: 전체 레이아웃
+export default function AppLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <header>App Header</header>
+        <main>{children}</main>
+        <footer>App Footer</footer>
+      </body>
+    </html>
+  );
+}
+```
+
+```javascript
+//app/dashboard/layout.js: 대시보드 레이아웃
+export default function DashboardLayout({ children }) {
+  return (
+    <div>
+      <h2>Dashboard</h2>
+      <div style={{ display: 'flex' }}>
+        <div style={{ width: '200px', borderRight: '1px solid #ccc' }}>
+          <Sidebar />
+        </div>
+        <div style={{ flexGrow: 1 }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+```javascript
+//app/dashboard/sidebar/page.js: 사이드바 내용
+export default function Sidebar() {
+  return (
+    <nav>
+      <ul>
+        <li><a href="/dashboard/overview">Overview</a></li>
+        <li><a href="/dashboard/reports">Reports</a></li>
+        <li><a href="/dashboard/settings">Settings</a></li>
+      </ul>
+    </nav>
+  );
+}
+```
+
+```javascript
+//app/dashboard/content/page.js: 콘텐츠 내용
+export default function Content() {
+  return (
+    <div>
+      <h3>Welcome to the Dashboard Content Area!</h3>
+      <p>This is where your main content will be displayed.</p>
+    </div>
+  );
+}
+```
+
+```javascript
+<html>
+  <body>
+    <header>App Header</header>
+    <main>
+      <div>
+        <h2>Dashboard</h2>
+        <div style="display: flex;">
+          <div style="width: 200px; border-right: 1px solid #ccc;">
+            <nav>
+              <ul>
+                <li><a href="/dashboard/overview">Overview</a></li>
+                <li><a href="/dashboard/reports">Reports</a></li>
+                <li><a href="/dashboard/settings">Settings</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div style="flex-grow: 1;">
+            <h3>Welcome to the Dashboard Content Area!</h3>
+            <p>This is where your main content will be displayed.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>App Footer</footer>
+  </body>
+</html>
+```
+
+### 중첩 라우팅 vs 병렬 라우팅 차이점 요약
+
+| 항목                       | 중첩 라우팅 (Nested Routing)                     | 병렬 라우팅 (Parallel Routing)                     |
+|--------------------------|------------------------------------------------|------------------------------------------------|
+| **구조**                   | 부모와 자식 관계를 통해 레이아웃을 중첩함         | 여러 경로를 독립적으로 동시에 로드함              |
+| **렌더링 방식**            | 자식 라우트가 부모 라우트의 레이아웃을 상속받아 함께 렌더링 | 각 라우트가 독립적으로 렌더링되며 동시에 표시됨     |
+| **사용 사례**              | 같은 레이아웃을 공유하는 여러 페이지가 있을 때 사용    | 복잡한 UI를 구성할 때, 여러 상태를 동시에 보여줄 때 사용 |
+| **재사용성**               | 레이아웃과 UI 요소의 재사용이 용이                   | 각 부분이 독립적으로 관리되므로 유연성이 높음       |
 
 
 ### 로딩 및 에러 상태 처리:
