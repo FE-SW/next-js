@@ -606,4 +606,46 @@ export default function HomePage() {
 * 설명: 서버 측에서 데이터를 패치하고 페이지를 렌더링하기 전에 실행되는 함수를 정의한다.
 * 예시: 사용자의 요청에 따라 실시간 데이터를 가져와 페이지를 생성한다.
 
+# 5.이미지 최적화
+Next.js에서 제공하는 Image 컴포넌트는 이미지 최적화를 위해 여러 가지 기능을 지원한다. 이를 통해 성능을 향상시키고 사용자 경험을 개선할 수 있다.
 
+### 지연 로딩 (Lazy Loading):
+loading="lazy" 속성을 통해 이미지가 뷰포트에 들어오기 전까지 로드되지 않도록 설정할 수 있다. 이는 초기 페이지 로딩 속도를 개선하고, 사용자에게 필요한 이미지만 로드하여 대역폭을 절약한다.
+
+### 자동 크기 조정:
+srcset 속성은 다양한 화면 크기에 맞게 이미지를 자동으로 조정한다. 예를 들어, 모바일 기기와 데스크톱 기기에서 각각 최적의 크기의 이미지를 로드하도록 지원한다.
+
+### 포맷 변환:
+Next.js는 브라우저의 지원 여부에 따라 이미지를 .webp와 같은 최적화된 포맷으로 변환하여 제공할 수 있다. 이는 이미지 로딩 속도를 더 개선할 수 있다.
+
+### 우선순위 설정:
+priority 속성을 사용하면 특정 이미지를 우선적으로 로드할 수 있다. 이 속성이 설정된 이미지는 지연 로딩이 적용되지 않으며, 페이지가 로드될 때 즉시 렌더링된다.
+
+### 개발자 도구에서의 렌더링
+```javascript
+import Image from 'next/image';
+import Link from 'next/link';
+import classes from './main-header.module.css';
+
+export default function MainHeader() {
+  return (
+    <header>
+      <Link className={classes.logo} href="/">
+        <Image
+          src={logoImg}
+          alt="A plate with food on it"
+          loading="lazy" // 지연 로딩 설정
+          width={1024} // 이미지 너비
+          height={1024} // 이미지 높이
+          priority // 우선 로딩 설정
+        />
+        NextLevel Food
+      </Link>
+    </header>
+  );
+}
+``` 
+개발자 도구에서 렌더링된 <img> 요소를 보면 다음과 같은 속성을 확인할 수 있다 <br/>
+* loading="lazy": 지연 로딩이 적용되었음을 나타낸다.
+* srcset: 다양한 해상도에 맞는 이미지를 제공하는 속성이다.
+* src: 최적화된 이미지의 URL이 포함되어 있다.
