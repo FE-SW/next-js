@@ -163,106 +163,120 @@ export default function DashboardPage() {
 ### 병렬 라우팅:
 병렬 라우팅은 여러 개의 라우트를 동시에 로드하고 렌더링할 수 있는 기능이다. 이를 통해 서로 다른 레이아웃이나 페이지를 독립적으로 관리하면서도 동시에 표시할 수 있다. 이 방식은 복잡한 사용자 인터페이스를 구성할 때 유용하며, 다양한 상태를 동시에 보여줄 수 있다.
 병렬 라우팅은 대시보드와 같은 복잡한 인터페이스에서 유용하다. 예를 들어, 대시보드의 왼쪽 사이드바와 오른쪽 콘텐츠 영역을 독립적으로 로드하고 업데이트할 수 있다. 이를 통해 사용자 경험을 향상시키고, 각 부분의 상태를 개별적으로 관리할 수 있다.
+병렬 라우팅을 구현하기 위해서는 라우트 그룹을 정의해야 한다. 이때, 폴더 이름 앞에 @ 기호를 붙여야 한다. @로 시작하는 폴더는 병렬 라우트 그룹으로 인식되며, 이 그룹 내의 모든 페이지가 동시에 로드될 수 있다.
 
 ```javascript
-app/
-├── dashboard/
-│   ├── layout.js
-│   ├── sidebar/
-│   │   └── page.js
-│   └── content/
-│       └── page.js
-└── layout.js
+/app
+  ├── @dashboard
+  │   ├── layout.tsx
+  │   ├── page.tsx
+  │   └── sidebar
+  │       └── page.tsx
+  ├──@settings
+  │   ├── layout.tsx
+  │   └── page.tsx
+  ├──layout.tsx
+
+
+@dashboard: 대시보드와 관련된 페이지와 컴포넌트를 포함하는 병렬 라우트 그룹.
+@settings: 설정과 관련된 페이지와 컴포넌트를 포함하는 병렬 라우트 그룹.
 ```
 
 ```javascript
-//app/layout.js: 전체 레이아웃
-export default function AppLayout({ children }) {
-  return (
-    <html>
-      <body>
-        <header>App Header</header>
-        <main>{children}</main>
-        <footer>App Footer</footer>
-      </body>
-    </html>
-  );
-}
-```
+// app/@dashboard/layout.js
+import Sidebar from './sidebar/page';
 
-```javascript
-//app/dashboard/layout.js: 대시보드 레이아웃
 export default function DashboardLayout({ children }) {
   return (
     <div>
-      <h2>Dashboard</h2>
-      <div style={{ display: 'flex' }}>
-        <div style={{ width: '200px', borderRight: '1px solid #ccc' }}>
-          <Sidebar />
-        </div>
-        <div style={{ flexGrow: 1 }}>
-          {children}
-        </div>
-      </div>
+      <Sidebar /> {/* 사이드바 컴포넌트 */}
+      <main>{children}</main> {/* 메인 콘텐츠 */}
     </div>
   );
 }
 ```
 
 ```javascript
-//app/dashboard/sidebar/page.js: 사이드바 내용
-export default function Sidebar() {
-  return (
-    <nav>
-      <ul>
-        <li><a href="/dashboard/overview">Overview</a></li>
-        <li><a href="/dashboard/reports">Reports</a></li>
-        <li><a href="/dashboard/settings">Settings</a></li>
-      </ul>
-    </nav>
-  );
-}
-```
-
-```javascript
-//app/dashboard/content/page.js: 콘텐츠 내용
-export default function Content() {
+// app/@settings/layout.js
+export default function SettingsLayout({ children }) {
   return (
     <div>
-      <h3>Welcome to the Dashboard Content Area!</h3>
-      <p>This is where your main content will be displayed.</p>
+      <h2>Settings Header</h2>
+      <main>{children}</main> {/* 메인 콘텐츠 */}
     </div>
   );
 }
 ```
 
 ```javascript
-<html>
-  <body>
-    <header>App Header</header>
-    <main>
-      <div>
-        <h2>Dashboard</h2>
-        <div style="display: flex;">
-          <div style="width: 200px; border-right: 1px solid #ccc;">
-            <nav>
-              <ul>
-                <li><a href="/dashboard/overview">Overview</a></li>
-                <li><a href="/dashboard/reports">Reports</a></li>
-                <li><a href="/dashboard/settings">Settings</a></li>
-              </ul>
-            </nav>
-          </div>
-          <div style="flex-grow: 1;">
-            <h3>Welcome to the Dashboard Content Area!</h3>
-            <p>This is where your main content will be displayed.</p>
-          </div>
+// app/layout.js
+
+Case.1
+export default function RootLayout({ children }) {
+  return (
+    <div>
+      <h1>Application Header</h1>
+      <div className="main-content">
+        {children} {/* 자식 컴포넌트 */}
+      </div>
+    </div>
+  );
+}
+
+Case.2
+export default function RootLayout({ dashboard, settings }) {
+  return (
+    <div>
+      <h1>Application Header</h1>
+      <div className="main-content">
+        <div className="dashboard-section">
+          {dashboard} {/* 대시보드 내용 */}
+        </div>
+        <div className="settings-section">
+          {settings} {/* 설정 내용 */}
         </div>
       </div>
-    </main>
-    <footer>App Footer</footer>
-  </body>
-</html>
+    </div>
+  );
+}
+
+```
+
+#### 동작 방식
+
+병렬 라우팅:
+사용자가 /dashboard 또는 /settings 경로로 접근할 때, 해당 라우팅 그룹의 레이아웃과 페이지가 동시에 렌더링된다.
+
+```javascript
+Case.1
+
+* Dashboard:
+/dashboard로 접근하면 DashboardLayout이 렌더링되고, 그 안에 Sidebar와 Main Dashboard Content가 표시
+
+* 결과:
+Application Header
+Sidebar Content
+Main Dashboard Content
+
+==========================================================================================
+
+* Settings:
+/settings로 접근하면 SettingsLayout이 렌더링되고, 그 안에 Settings Header와 Settings Content가 표시.
+
+* 결과:
+Application Header
+Settings Header
+Settings Content
+```
+
+```javascript
+Case.2
+/dashboard 또는 /settings로 접근하면
+
+결과:
+Application Header
+Dashboard Content (대시보드 관련 내용)
+Settings Content (설정 관련 내용)
 ```
 
 ### 중첩 라우팅 vs 병렬 라우팅 차이점 요약
@@ -644,8 +658,10 @@ export default function MainHeader() {
     </header>
   );
 }
-``` 
+```
 개발자 도구에서 렌더링된 <img> 요소를 보면 다음과 같은 속성을 확인할 수 있다 <br/>
 * loading="lazy": 지연 로딩이 적용되었음을 나타낸다.
 * srcset: 다양한 해상도에 맞는 이미지를 제공하는 속성이다.
 * src: 최적화된 이미지의 URL이 포함되어 있다.
+
+
