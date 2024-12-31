@@ -818,3 +818,117 @@ export async function generateMetadata({ params }) {
 
 별도의 호출이나 설정 없이도 메타데이터가 적용된다. 이는 Next.js의 파일 기반 라우팅 시스템과 자동 메타데이터 주입 기능 덕분이다.
 
+# 8.Streaming SSR
+Streaming SSR은 Next.js 13에서 도입된 기능으로, 서버에서 렌더링된 HTML을 점진적으로 클라이언트에 전송하는 방식이다.
+설명만 보면 기존의 SSR과의 차이점을 느끼기가 힘든데, 차이점은 아래와 같다.
+
+#### 기존 SSR
+```javascript
+// 기존 SSR 방식
+export default async function ProductPage() {
+  // 모든 데이터를 기다린 후에야 페이지 렌더링 시작
+  const product = await fetchProduct()     // 1초 소요
+  const reviews = await fetchReviews()     // 2초 소요
+  const recommendations = await fetchRecommendations() // 3초 소요
+
+  // 총 6초 후에야 사용자에게 페이지가 보임
+  return (
+    <div>
+      <ProductInfo product={product} />
+      <Reviews reviews={reviews} />
+      <Recommendations recommendations={recommendations} />
+    </div>
+  )
+}
+```
+#### Streaming SSR
+
+```javascript
+// Streaming SSR 방식
+import { Suspense } from 'react'
+
+export default async function ProductPage() {
+  // ProductInfo는 즉시 렌더링 (1초)
+  const product = await fetchProduct()
+
+  return (
+    <div>
+      <ProductInfo product={product} />
+      
+      {/* Reviews는 독립적으로 로딩 (2초) */}
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <Reviews />
+      </Suspense>
+
+      {/* Recommendations도 독립적으로 로딩 (3초) */}
+      <Suspense fallback={<RecommendationsSkeleton />}>
+        <Recommendations />
+      </Suspense>
+    </div>
+  )
+}
+```
+
+#### 렌더링 방식
+* 기존 SSR: 모든 데이터가 준비될 때까지 기다린 후 한 번에 페이지 전체를 렌더링
+* Streaming SSR: 준비된 컴포넌트부터 순차적으로 렌더링하고 스트리밍
+
+#### 사용자 경험
+```javascript
+// 기존 SSR의 타임라인
+0초: 빈 화면
+6초: 전체 페이지 표시
+
+// Streaming SSR의 타임라인
+0초: 로딩 UI 표시
+1초: ProductInfo 표시
+2초: Reviews 표시
+3초: Recommendations 표시
+```
+
+#### 시각적 비교
+```javascript
+// 기존 SSR
+┌────────────────────┐
+│                    │
+│     Loading...     │ (6초 동안)
+│                    │
+└────────────────────┘
+           ↓
+┌────────────────────┐
+│    Product Info    │
+│      Reviews       │ (6초 후 한번에 표시)
+│  Recommendations   │
+└────────────────────┘
+
+// Streaming SSR
+┌────────────────────┐
+│    Product Info    │ (1초)
+│    Loading...      │
+│    Loading...      │
+└────────────────────┘
+           ↓
+┌────────────────────┐
+│    Product Info    │
+│     Reviews        │ (2초)
+│    Loading...      │
+└────────────────────┘
+           ↓
+┌────────────────────┐
+│    Product Info    │
+│     Reviews        │ (3초)
+│  Recommendations   │
+└────────────────────┘
+```
+
+#### 장점:
+* 더 빠른 초기 로딩
+* 더 나은 사용자 경험
+* 서버 리소스 효율적 사용
+* 점진적인 페이지 로드
+
+#### 단점:
+* 구현 복잡도 증가
+* 컴포넌트 설계 신중 필요
+* 로딩 상태 관리 필요
+* Streaming SSR은 특히 데이터 의존성이 많은 큰 페이지에서 사용자 경험을 크게 개선할 수 있습니다.
