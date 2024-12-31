@@ -715,4 +715,106 @@ export default function MainHeader() {
 * srcset: 다양한 해상도에 맞는 이미지를 제공하는 속성이다.
 * src: 최적화된 이미지의 URL이 포함되어 있다.
 
+# 6.Server Actions
+Server Actions는 Next.js 13.4에서 도입된 기능으로, 클라이언트에서 서버의 함수를 직접 호출할 수 있게 해주는 기능이다.
+
+```javascript
+// app/actions.js
+'use server'
+
+export async function createTodo(formData) {
+  const title = formData.get('title')
+  await db.todo.create({ title })
+}
+```
+
+```javascript
+// app/components/TodoForm.js
+'use client'
+
+import { createTodo } from '../actions'
+
+export default function TodoForm() {
+  return (
+    <form action={createTodo}>
+      <input type="text" name="title" />
+      <button type="submit">Add Todo</button>
+    </form>
+  )
+}
+```
+### 장점:
+* 보안: 서버 코드가 클라이언트에 노출되지 않음
+* 성능: 클라이언트-서버 통신 최적화
+* 개발 경험: API 엔드포인트 생성 없이 서버 함수 직접 호출
+
+### 사용 사례:
+* 폼 제출
+* 데이터베이스 조작
+* 파일 업로드
+* 인증/인가 처리
+
+# 7.Metadata API
+Metadata API는 Next.js 13에서 도입된 새로운 메타데이터 관리 시스템으로, SEO와 소셜 미디어 공유를 위한 메타데이터를 더 쉽게 관리할 수 있게 해준다.
+
+#### 정적 메타데이터
+```javascript
+// app/layout.js
+export const metadata = {
+  title: 'My Website',
+  description: 'Welcome to my website',
+  openGraph: {
+    title: 'My Website',
+    description: 'Welcome to my website',
+    images: [
+      {
+        url: 'https://example.com/og.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'My Website',
+    description: 'Welcome to my website',
+    images: ['https://example.com/og.jpg'],
+  },
+}
+```
+
+#### 동적 메타데이터
+
+ Next.js 13부터는 generateMetadata 함수를 페이지 컴포넌트와 같은 파일에 export하기만 하면 자동으로 메타데이터가 적용된다.
+
+```javascript
+// app/products/[id]/page.tsx
+export async function generateMetadata({ params }) {
+  const post = await getPost(params.id)
+  
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [post.ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [post.ogImage],
+      creator: '@yourTwitterHandle',   
+      site: '@yourWebsiteTwitter',     
+    },
+  }
+}
+```
+
+* 1.Next.js가 자동으로 generateMetadata 함수를 인식
+* 2.페이지가 요청될 때 메타데이터를 생성
+* 3.생성된 메타데이터를 페이지의 <head> 섹션에 자동으로 주입
+
+별도의 호출이나 설정 없이도 메타데이터가 적용된다. 이는 Next.js의 파일 기반 라우팅 시스템과 자동 메타데이터 주입 기능 덕분이다.
 
