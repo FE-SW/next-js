@@ -288,59 +288,7 @@ Settings Content (설정 관련 내용)
 | **사용 사례**              | 같은 레이아웃을 공유하는 여러 페이지가 있을 때 사용    | 복잡한 UI를 구성할 때, 여러 상태를 동시에 보여줄 때 사용 |
 | **재사용성**               | 레이아웃과 UI 요소의 재사용이 용이                   | 각 부분이 독립적으로 관리되므로 유연성이 높음       |
 
-
-### Catch-All Routes
-Next.js의 Catch-All Routes를 사용하여 URL 경로를 처리할 때, 인자의 개수에 따라 다양한 방식으로 경로를 매핑할 수 있다. 예를 들어, /archive와 같은 경로는 인자가 없고, /archive/2024와 같은 경로는 하나의 인자를, /archive/2024/3과 같은 경로는 두 개의 인자를 캐치할 수 있
-다. 이를 통해 복잡한 URL 구조를 유연하게 처리할 수 있다.
-
-#### Catch-All Route 구조
-* 폴더 구조:
-/pages/archive/[...params].js와 같은 구조를 사용하여 Catch-All Route를 정의한다.
-
-* 예시 코드:
-```javascript
-// pages/archive/[...params].js
-import { useRouter } from 'next/router';
-
-const ArchivePage = () => {
-  const router = useRouter();
-  const { params } = router.query; // params는 배열입니다.
-
-  return (
-    <div>
-      <h1>Archive Page</h1>
-      {params ? (
-        <div>
-          <p>Number of parameters: {params.length}</p>
-          <ul>
-            {params.map((param, index) => (
-              <li key={index}>{param}</li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p>No parameters</p>
-      )}
-    </div>
-  );
-};
-
-export default ArchivePage;
-```
-
-#### 인자에 따른 캐치 차이
-
-* 인자 없음 (/archive):
-이 경우, params가 정의되지 않거나 비어 있는 배열이 되며, URL 경로에 아무런 추가 정보가 없음을 나타냄
-
-* 인자 하나 (/archive/2024):
-하나의 인자가 캐치된다. 이는 특정 연도(예: 2024)와 같은 의미를 가질 수 있다.
-
-* 인자 두 개 (/archive/2024/3):
-두 개의 인자가 캐치된다. 예를 들어, 첫 번째 인자는 연도(2024), 두 번째 인자는 월(3)으로 해석될 수 있다.
-
-
-## 로딩 및 에러 상태 처리:
+## 서버 컴포넌트 로딩 및 에러 상태 처리:
 로딩 UI와 에러 경계를 설정하여 사용자에게 더 나은 피드백을 제공한다. 페이지 전환 시 로딩 상태를 표시하거나, 특정 페이지에서 발생하는 에러를 처리할 수 있다.
 
 1.사용자가 /user/[id] 경로에 접근 <br/>
@@ -932,3 +880,54 @@ export default async function ProductPage() {
 * 컴포넌트 설계 신중 필요
 * 로딩 상태 관리 필요
 * Streaming SSR은 특히 데이터 의존성이 많은 큰 페이지에서 사용자 경험을 크게 개선할 수 있습니다.
+
+
+### Catch-All Routes
+Next.js의 Catch-All Routes를 사용하여 URL 경로를 처리할 때, 인자의 개수에 따라 다양한 방식으로 경로를 매핑할 수 있다. 예를 들어, /archive와 같은 경로는 인자가 없고, /archive/2024와 같은 경로는 하나의 인자를, /archive/2024/3과 같은 경로는 두 개의 인자를 캐치할 수 있
+다. 이를 통해 복잡한 URL 구조를 유연하게 처리할 수 있다.
+
+#### Catch-All Route 구조
+* 폴더 구조:
+/pages/archive/[...params].js와 같은 구조를 사용하여 Catch-All Route를 정의한다.
+
+* 예시 코드:
+```javascript
+// pages/archive/[...params].js
+import { useRouter } from 'next/router';
+
+const ArchivePage = () => {
+  const router = useRouter();
+  const { params } = router.query; // params는 배열입니다.
+
+  return (
+    <div>
+      <h1>Archive Page</h1>
+      {params ? (
+        <div>
+          <p>Number of parameters: {params.length}</p>
+          <ul>
+            {params.map((param, index) => (
+              <li key={index}>{param}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p>No parameters</p>
+      )}
+    </div>
+  );
+};
+
+export default ArchivePage;
+```
+
+#### 인자에 따른 캐치 차이
+
+* 인자 없음 (/archive):
+이 경우, params가 정의되지 않거나 비어 있는 배열이 되며, URL 경로에 아무런 추가 정보가 없음을 나타냄
+
+* 인자 하나 (/archive/2024):
+하나의 인자가 캐치된다. 이는 특정 연도(예: 2024)와 같은 의미를 가질 수 있다.
+
+* 인자 두 개 (/archive/2024/3):
+두 개의 인자가 캐치된다. 예를 들어, 첫 번째 인자는 연도(2024), 두 번째 인자는 월(3)으로 해석될 수 있다.
