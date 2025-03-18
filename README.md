@@ -288,7 +288,7 @@ Settings Content (설정 관련 내용)
 | **사용 사례**              | 같은 레이아웃을 공유하는 여러 페이지가 있을 때 사용    | 복잡한 UI를 구성할 때, 여러 상태를 동시에 보여줄 때 사용 |
 | **재사용성**               | 레이아웃과 UI 요소의 재사용이 용이                   | 각 부분이 독립적으로 관리되므로 유연성이 높음       |
 
-## 서버 컴포넌트 로딩 및 에러 상태 처리:
+### 서버 컴포넌트 로딩 및 에러 상태 처리:
 로딩 UI와 에러 경계를 설정하여 사용자에게 더 나은 피드백을 제공한다. 페이지 전환 시 로딩 상태를 표시하거나, 특정 페이지에서 발생하는 에러를 처리할 수 있다.
 
 1.사용자가 /user/[id] 경로에 접근 <br/>
@@ -333,8 +333,71 @@ export default async function UserPage({ params }) {
 
   return <div>{userData.name}</div>;
 }
-
 ```
+
+### app router에서 에러페이지 설정
+
+#### 1.전역적으로 통일된 에러 페이지 만들기
+```javascript
+app/
+└── (error)/
+    ├── error.js
+    └── not-found.js
+
+
+// app/(error)/error.js
+export default function GlobalError({ error, reset }) {
+  return (
+    <div>
+      <h1>오류가 발생했습니다!</h1>
+      <p>{error.message}</p>
+      <button onClick={() => reset()}>다시 시도</button>
+    </div>
+  );
+}
+
+// app/(error)/not-found.js
+export default function NotFoundPage() {
+  return (
+    <div>
+      <h1>404 - 페이지를 찾을 수 없습니다</h1>
+      <p>요청하신 페이지가 존재하지 않습니다.</p>
+    </div>
+  );
+}
+```
+
+#### 2.경로마다 별도로 에러 페이지 만들기
+```javascript
+app/
+└── user/
+    ├── error.js
+    ├── not-found.js
+    └── [id]/
+        └── page.js
+
+// app/user/error.js
+export default function UserError({ error, reset }) {
+  return (
+    <div>
+      <h1>사용자 페이지 오류</h1>
+      <p>{error.message}</p>
+      <button onClick={() => reset()}>다시 시도</button>
+    </div>
+  );
+}
+
+// app/user/not-found.js
+export default function UserNotFoundPage() {
+  return (
+    <div>
+      <h1>404 - 사용자 페이지를 찾을 수 없습니다</h1>
+      <p>요청하신 사용자 페이지가 존재하지 않습니다.</p>
+    </div>
+  );
+}
+```
+
 
 ## Page Router
 페이지 라우터는 Next.js의 전통적인 라우팅 시스템 방식이다.
@@ -458,14 +521,38 @@ export default function HomePage() {
 
 ```
 
-**Custom 404 페이지:** <br/>
-사용자가 잘못된 경로로 접근할 경우 표시할 커스텀 404 페이지를 쉽게 설정할 수 있다. pages/404.js 파일을 생성하여 사용자 정의 에러 페이지를 제공한다.
+### Page Router에서의 에러 페이지 설정
+page router에서는 app router와는 다르게 통일된 에러페이지만 사용할 수 있다
 
-**Link 컴포넌트:** <br/>
+```javascript
+pages/
+├── 404.js        // 커스텀 404 페이지
+└── _error.js     // 서버 장애 및 기타 에러 페이지
+
+// pages/404.js
+export default function Custom404() {
+  return <h1>404 - 페이지를 찾을 수 없습니다</h1>;
+}
+
+// pages/_error.js
+export default function Error({ statusCode }) {
+  return (
+    <p>
+      {statusCode
+        ? `서버에서 ${statusCode} 오류가 발생했습니다.`
+        : '클라이언트에서 오류가 발생했습니다.'}
+    </p>
+  );
+}
+
+Error.getInitialProps = ({ res, err }) => {
+  const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
+  return { statusCode };
+};
+```
+
+### Link 컴포넌트
 내비게이션을 위한 Link 컴포넌트를 사용하여 페이지 간의 전환을 부드럽게 처리할 수 있다. Link 컴포넌트는 페이지 전환 시 성능을 최적화 한다.
-
-
-
 
 # 3.서버 컴포넌트, 클라이언트 컴포넌트, SSR, CSR 총정리
 
