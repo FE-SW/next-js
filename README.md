@@ -345,7 +345,7 @@ pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생�
 ### 정적 및 동적 페이지 생성:
 정적 사이트 생성(SSG) 및 서버 사이드 렌더링(SSR)을 통해 페이지를 생성할 수 있다. getStaticProps, getServerSideProps를 사용하여 데이터를 fetch 한다.
 
-**정적 사이트 생성 (SSG)**
+****
 getStaticProps를 사용하여 정적 페이지를 생성하는 예시이다. 이 방법은 빌드 시 데이터를 미리 가져와서 정적 HTML 파일로 생성한다.
 
 ```javascript
@@ -376,7 +376,7 @@ export async function getStaticProps() {
 }
 ```
 
-**정적 사이트 생성 (SSG)**
+**서버 사이드 렌더링 (SSR)**
 getServerSideProps를 사용하여 서버 사이드에서 데이터를 가져오는 예시이다. 이 방법은 페이지 요청 시마다 서버에서 데이터를 가져온다.
 
 ```javascript
