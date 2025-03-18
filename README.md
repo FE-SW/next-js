@@ -400,15 +400,12 @@ export default function UserNotFoundPage() {
 
 
 ## Page Router
-페이지 라우터는 Next.js의 전통적인 라우팅 시스템 방식이다.
+페이지 라우터는 Next.js의 전통적인 라우팅 시스템 방식이다. 
+파일기반으로 라우팅되며, pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생성된다. 예를 들어, pages/contact.js 파일은 /contact 경로에 매핑된다.
 
-### 파일 기반 라우팅:
-pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생성된다. 예를 들어, pages/contact.js 파일은 /contact 경로에 매핑된다.
 
-### 정적 및 동적 페이지 생성:
-정적 사이트 생성(SSG) 및 서버 사이드 렌더링(SSR)을 통해 페이지를 생성할 수 있다. getStaticProps, getServerSideProps를 사용하여 데이터를 fetch 한다.
 
-#### SSR
+### SSR
 getServerSideProps를 사용하여 서버 사이드에서 데이터를 가져오는 예시이다. 이 방법은 페이지 요청 시마다 서버에서 데이터를 가져온다.
 
 ```javascript
@@ -436,7 +433,7 @@ export async function getServerSideProps({ params }) {
 
 ```
 
-#### SSG
+### SSG
 getStaticProps를 사용하여 정적 페이지를 생성하는 예시이다. 이 방법은 빌드 시 데이터를 미리 가져와서 정적 HTML 파일로 생성한다.
 
 ```javascript
@@ -467,7 +464,7 @@ export async function getStaticProps() {
 }
 ```
 
-#### ISR
+### ISR
 Next.js에서 정적 사이트 생성(SSG)의 장점을 유지하면서도, 페이지를 주기적으로 업데이트할 수 있는 기능을 제공한다. ISR을 사용하면 정적 페이지를 생성한 후, 지정된 시간 간격으로 백그라운드에서 페이지를 재생성할 수 있다.
 "백그라운드에서 재생성"된다는 것은 해당 페이지가 요청될 때마다 백그라운드에서 재생성된다는 의미입니다. 즉, 페이지가 실제로 요청될 때만 재생성이 트리거된다.
 
