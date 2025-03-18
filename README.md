@@ -408,6 +408,34 @@ pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생�
 ### 정적 및 동적 페이지 생성:
 정적 사이트 생성(SSG) 및 서버 사이드 렌더링(SSR)을 통해 페이지를 생성할 수 있다. getStaticProps, getServerSideProps를 사용하여 데이터를 fetch 한다.
 
+#### SSR
+getServerSideProps를 사용하여 서버 사이드에서 데이터를 가져오는 예시이다. 이 방법은 페이지 요청 시마다 서버에서 데이터를 가져온다.
+
+```javascript
+// 서버 사이드 렌더링 (SSR)
+export default function PostPage({ post }) {
+  return (
+    <div>
+      <h1>{post.title}</h1>
+      <p>{post.body}</p>
+    </div>
+  );
+}
+
+// 페이지 요청 시 데이터를 가져옴
+export async function getServerSideProps({ params }) {
+  const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${params.id}`);
+  const post = await res.json();
+
+  return {
+    props: {
+      post, // 페이지에 전달할 데이터
+    },
+  };
+}
+
+```
+
 #### SSG
 getStaticProps를 사용하여 정적 페이지를 생성하는 예시이다. 이 방법은 빌드 시 데이터를 미리 가져와서 정적 HTML 파일로 생성한다.
 
@@ -439,35 +467,86 @@ export async function getStaticProps() {
 }
 ```
 
-#### SSR
-getServerSideProps를 사용하여 서버 사이드에서 데이터를 가져오는 예시이다. 이 방법은 페이지 요청 시마다 서버에서 데이터를 가져온다.
+#### ISR
+Next.js에서 정적 사이트 생성(SSG)의 장점을 유지하면서도, 페이지를 주기적으로 업데이트할 수 있는 기능을 제공한다. ISR을 사용하면 정적 페이지를 생성한 후, 지정된 시간 간격으로 백그라운드에서 페이지를 재생성할 수 있다.
+"백그라운드에서 재생성"된다는 것은 해당 페이지가 요청될 때마다 백그라운드에서 재생성된다는 의미입니다. 즉, 페이지가 실제로 요청될 때만 재생성이 트리거된다.
 
 ```javascript
-// 서버 사이드 렌더링 (SSR)
-export default function PostPage({ post }) {
+// 증분 정적 재생성 (ISR)
+export default function PostsPage({ posts }) {
   return (
     <div>
-      <h1>{post.title}</h1>
-      <p>{post.body}</p>
+      <h1>Posts</h1>
+      <ul>
+        {posts.map(post => (
+          <li key={post.id}>{post.title}</li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-// 페이지 요청 시 데이터를 가져옴
-export async function getServerSideProps({ params }) {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${params.id}`);
-  const post = await res.json();
+// 빌드 시 데이터를 가져오고, 주기적으로 재생성
+export async function getStaticProps() {
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts');
+  const posts = await res.json();
 
   return {
     props: {
-      post, // 페이지에 전달할 데이터
+      posts, // 페이지에 전달할 데이터
     },
+    revalidate: 60, // 60초마다 페이지를 백그라운드에서 재생성
   };
 }
-
 ```
 
-**API Routes:** <br/>
+**ISR 동작방식**
+
+ex) revaludate 60으로 설정
+* 1.첫 번째 방문: 페이지가 처음 요청되면, Next.js는 빌드 시점에 생성된 정적 HTML을 제공
+* 2.50초 동안 머무름: 이 동안에는 페이지가 그대로 유지된다. revalidate 시간이 아직 지나지 않았기 때문에, 페이지는 여전히 초기 상태
+* 3.페이지를 떠남: 페이지를 떠나도, Next.js는 백그라운드에서 아무 작업도 하지 않다. 재생성은 페이지 요청에 의해 트리거된다.
+* 4.다음 방문: 페이지를 다시 방문하면, Next.js는 revalidate 시간이 지났는지 확인한다.
+* 5.10초 후 재생성: 두 번째 방문 시점에서 60초가 지났다면, Next.js는 백그라운드에서 페이지를 재생성한다. 이때, 사용자는 여전히 기존의 정적 페이지를 보게 된다.
+* 6.업데이트된 페이지 제공: 백그라운드 재생성이 완료된 후, 그 다음 요청부터는 업데이트된 페이지가 제공된다.
+따라서, revalidate 시간이 지난 후에 페이지가 요청될 때만 백그라운드에서 재생성이 이루어진다. 이 과정은 사용자가 페이지를 떠나거나 머무르는 것과는 무관하게, 페이지 요청에 의해 트리거된다.
+
+### 페이지 랜더링 방식
+
+#### 1.서버 사이드 렌더링(SSR) - getServerSideProps 사용 시:
+* 첫 번째 방문: 페이지가 서버에서 렌더링되어 클라이언트로 전송
+* 두 번째 및 이후 방문: 매 요청마다 서버에서 다시 렌더링함. Next.js 자체적으로는 캐싱을 하지 않지만(매번 페이지 요청마다 fetch call 수행, getServerSideProps 내부에서 캐싱 로직을 구현할 수 있다.
+
+별도의 캐싱로직은 아래와 같은 방법으로 구현할 수 있다.
+
+**캐싱 로직 구현** 
+* 헤더 기반 캐싱: HTTP 캐싱 헤더를 사용하여 브라우저나 CDN에서 캐싱을 구현할 수 있다. 예를 들어, Cache-Control 헤더를 설정하여 응답을 캐싱할 수 있다.
+* 외부 캐싱 레이어: Redis, CDN 등 외부 캐싱 솔루션을 사용하여 서버 응답을 캐싱할 수 있다.
+* 메모리 캐싱: 서버 메모리에 데이터를 캐싱하여, 동일한 요청에 대해 API 호출을 줄일 수 있다. 이는 서버의 메모리를 사용하므로, 적절한 만료 정책을 설정해야 한다.
+
+#### 2.정적 사이트 생성(SSG) - getStaticProps 사용 시:
+* 첫 번째 방문: 빌드 시점에 미리 렌더링된 정적 HTML 파일이 제공
+* 두 번째 및 이후 방문: 동일한 정적 HTML 파일이 서버나 CDN에서 제공되어 매우 빠르게 로드
+
+#### 3.클라이언트 사이드 렌더링 - ueEffect fetch:
+* 컴포넌트 내부에서 useEffect 같은 훅을 사용하여 데이터를 가져오는 경우, 초기 페이지 로드는 서버에서 렌더링되지만, 이후 데이터 패칭은 클라이언트에서 이루어진다. 페이지 자체는 정적으로 제공되지만, 데이터 업데이트는 클라이언트에서 처리된다.
+
+#### 4.증분 정적 재생성(ISR) - getStaticProps + revalidate 사용 시:
+* 첫 번째 방문: 빌드 시점에 미리 렌더링된 정적 HTML 파일이 제공됨.
+* 두 번째 및 이후 방문: 지정된 revalidate 시간 간격에 따라 백그라운드에서 페이지가 재생성됨. 이로 인해 최신 데이터를 주기적으로 반영할 수 있음.
+
+#### 4.그외 - fetch가 없는 코드
+* 정적 파일로 처리: API 호출이나 동적 데이터 패칭이 없는 경우, Next.js는 해당 페이지를 정적 파일로 처리합니다. 이는 SSG의 기본적인 동작 방식과 동일하며, 페이지는 정적으로 제공된다.
+
+
+#### 요약
+* SSR: 매 요청마다 서버에서 렌더링되며, 별도의 캐싱 로직이 없으면 매번 API 호출이 발생
+* SSG: 정적 HTML 파일로 제공되어 빠르게 로드
+* ISR: 정적 HTML 파일로 제공되며, 지정된 간격으로 백그라운드에서 페이지가 재생성됨
+* CSR: 클라이언트에서 데이터를 패칭하고 업데이트
+* 정적 콘텐츠: API 호출이 없는 경우, 정적 파일로 제공
+
+### API Routes:
 페이지 라우터는 API 라우트를 지원하여, 서버 측에서 데이터를 처리할 수 있다. pages/api 디렉토리 내에 API 핸들러를 정의하여 RESTful API를 구축할 수 있다.
 
 ```javascript
