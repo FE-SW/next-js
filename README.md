@@ -347,7 +347,7 @@ export default async function UserPage({ params }) {
 
 ### (6).app router에서 에러페이지 설정
 
-#### 1.전역적으로 통일된 에러 페이지 만들기
+#### 전역적으로 통일된 에러 페이지 만들기
 ```javascript
 app/
 └── (error)/
@@ -377,7 +377,7 @@ export default function NotFoundPage() {
 }
 ```
 
-#### 2.경로마다 별도로 에러 페이지 만들기
+#### 경로마다 별도로 에러 페이지 만들기
 ```javascript
 app/
 └── user/
@@ -519,7 +519,7 @@ ex) revaludate 60으로 설정
 
 ### (4).페이지 랜더링 방식
 
-#### 1.서버 사이드 렌더링(SSR) - getServerSideProps 사용 시:
+#### 서버 사이드 렌더링(SSR) - getServerSideProps 사용 시:
 * 첫 번째 방문: 페이지가 서버에서 렌더링되어 클라이언트로 전송
 * 두 번째 및 이후 방문: 매 요청마다 서버에서 다시 렌더링함. Next.js 자체적으로는 캐싱을 하지 않지만(매번 페이지 요청마다 fetch call 수행) 별도의 캐싱로직을 구현할 수 있다.
 
@@ -528,18 +528,18 @@ ex) revaludate 60으로 설정
 * 외부 캐싱 레이어: Redis, CDN 등 외부 캐싱 솔루션을 사용하여 서버 응답을 캐싱할 수 있다.
 * 메모리 캐싱: 서버 메모리에 데이터를 캐싱하여, 동일한 요청에 대해 API 호출을 줄일 수 있다. 이는 서버의 메모리를 사용하므로, 적절한 만료 정책을 설정해야 한다.
 
-#### 2.정적 사이트 생성(SSG) - getStaticProps 사용 시:
+#### 정적 사이트 생성(SSG) - getStaticProps 사용 시:
 * 첫 번째 방문: 빌드 시점에 미리 렌더링된 정적 HTML 파일이 제공
 * 두 번째 및 이후 방문: 동일한 정적 HTML 파일이 서버나 CDN에서 제공되어 매우 빠르게 로드
 
-#### 3.클라이언트 사이드 렌더링 - ueEffect fetch:
+#### 클라이언트 사이드 렌더링 - ueEffect fetch:
 * 컴포넌트 내부에서 useEffect 같은 훅을 사용하여 데이터를 가져오는 경우, 초기 페이지 로드는 서버에서 렌더링되지만, 이후 데이터 패칭은 클라이언트에서 이루어진다. 페이지 자체는 정적으로 제공되지만, 데이터 업데이트는 클라이언트에서 처리된다.
 
-#### 4.증분 정적 재생성(ISR) - getStaticProps + revalidate 사용 시:
+#### 증분 정적 재생성(ISR) - getStaticProps + revalidate 사용 시:
 * 첫 번째 방문: 빌드 시점에 미리 렌더링된 정적 HTML 파일이 제공됨.
 * 두 번째 및 이후 방문: 지정된 revalidate 시간 간격에 따라 백그라운드에서 페이지가 재생성됨. 이로 인해 최신 데이터를 주기적으로 반영할 수 있음.
 
-#### 4.그외 - fetch가 없는 코드
+#### 그외 - fetch가 없는 코드
 * 정적 파일로 처리: API 호출이나 동적 데이터 패칭이 없는 경우, Next.js는 해당 페이지를 정적 파일로 처리합니다. 이는 SSG의 기본적인 동작 방식과 동일하며, 페이지는 정적으로 제공된다.
 
 
@@ -660,55 +660,55 @@ Error.getInitialProps = ({ res, err }) => {
 # 4.보호된 파일
 보호된 파일(Protected Files)은 각 파일이 특정한 역할을 수행하며, 애플리케이션의 구조와 동작 방식을 정의하는 중요한 요소들이다.
 
-### 1. page.js (App Router)
+### page.js (App Router)
 * 설명: 해당 라우팅 경로에 접속했을 때 기본적으로 표시되는 유니크한 페이지를 정의한다.
 * 예시: app/dashboard/page.js는 /dashboard 경로에 접속할 때 보여지는 대시보드 페이지이다.
 
-#### 2. layout.js (App Router)
+#### layout.js (App Router)
 * 설명: 여러 하위 페이지에 공통적으로 적용되는 레이아웃을 정의하는 파일
 * 예시: app/dashboard/layout.js는 대시보드 하위 페이지들(예: /dashboard/overview, /dashboard/settings)에 공통적으로 적용되는 레이아웃을 제공
 
-### 3. not-found.js (App Router)
+### not-found.js (App Router)
 * 설명: 존재하지 않는 페이지에 접근했을 때 표시되는 오류 페이지를 정의
 * 예시: 사용자가 /invalid-route에 접근할 때 보여지는 "페이지를 찾을 수 없습니다" 메시지를 포함
 
-### 4. error.js (App Router)
+### error.js (App Router)
 * 설명: 예상치 못한 오류가 발생했을 때 표시되는 오류 페이지를 정의
 * 예시: 서버 오류가 발생했을 때 사용자에게 보여주는 오류 메시지를 포함
 
-### 5. loading.js (App Router)
+### loading.js (App Router)
 * 설명: 페이지 로딩 중에 표시되는 로딩 페이지를 정의한다.
 * 예시: 데이터가 로드되는 동안 사용자가 볼 수 있는 스피너나 로딩 메시지를 포함
 
-### 6. route.js (App Router)
+### route.js (App Router)
 * 설명: 서버 측 라우팅을 위한 코드를 포함하는 파일이다. API 라우트를 정의하는 데 사용
 * 예시: app/api/users/route.js는 사용자 정보를 가져오는 API 엔드포인트를 정의
 
-### 7. default.js (App Router)
+### default.js (App Router)
 * 설명: 특정 라우팅 경로에 대한 기본 페이지 역할을 하는 파일
 * 예시: / 경로에 대한 기본 페이지를 설정할 수 있다.
 
-### 8. instrumentation.js (App Router)
+### instrumentation.js (App Router)
 * 설명: 코드 분석 및 디버그, 성능 추적을 위한 코드를 포함하는 파일
 * 예시: 앱의 성능을 모니터링하고 분석하기 위한 코드가 포함될 수 있다.
 
-### 9. middleware.js (공통)
+### middleware.js (공통)
 * 설명: 페이지 요청 및 응답을 가로채고 처리하는 미들웨어 함수를 포함하는 파일
 * 예시: 인증 확인, 로깅 또는 요청 변환 등의 작업을 수행할 수 있다.
 
-### 10. template.js (App Router)
+### template.js (App Router)
 * 설명: 페이지 템플릿을 정의하는 파일
 * 예시: 여러 페이지에 공통적으로 적용되는 템플릿을 정의하여 재사용성을 높인다.
 
-### 11. _app.js (Page Router)
+### _app.js (Page Router)
 * 설명: Next.js 애플리케이션의 전역 레이아웃을 정의하는 파일이다. 모든 페이지에 공통적으로 적용되는 설정이나 레이아웃을 설정한다.
 * 예시: 전역 스타일, 테마, 상단 내비게이션 바 등을 포함할 수 있다.
 
-### 12. getStaticProps.js (Page Router)
+### getStaticProps.js (Page Router)
 * 설명: 정적 사이트 생성(SSG)을 위해 서버 측에서 데이터를 패치하고 페이지를 렌더링하는 함수를 정의
 * 예시: 빌드 시 API에서 데이터를 가져와 정적 페이지를 생성한다.
 
-### 13. getServerSideProps.js (Page Router)
+### getServerSideProps.js (Page Router)
 * 설명: 서버 측에서 데이터를 패치하고 페이지를 렌더링하기 전에 실행되는 함수를 정의
 * 예시: 사용자의 요청에 따라 실시간 데이터를 가져와 페이지를 생성한다.
 
@@ -984,25 +984,25 @@ export default async function ProductPage() {
 
 ### (2).하이드레이션이 발생하는 케이스
 
-#### 1.서버 사이드 렌더링(SSR):
+#### 서버 사이드 렌더링(SSR):
 * 케이스: getServerSideProps를 사용하여 서버에서 페이지를 렌더링한 경우.
 * 하이드레이션 과정: 서버에서 렌더링된 HTML이 클라이언트로 전송된 후, 클라이언트 측에서 React가 이 HTML을 하이드레이트하여 상호작용이 가능하게 만든다.
 
-#### 2.정적 사이트 생성(SSG):
+#### 정적 사이트 생성(SSG):
 * 케이스: getStaticProps를 사용하여 빌드 시점에 정적 HTML을 생성한 경우.
 * 하이드레이션 과정: 정적 HTML이 클라이언트로 전송된 후, 클라이언트 측에서 React가 이 HTML을 하이드레이트하여 상호작용이 가능하게 만든다.
 
-#### 3.증분 정적 재생성(ISR):
+#### 증분 정적 재생성(ISR):
 * 케이스: getStaticProps와 revalidate를 사용하여 정적 페이지를 주기적으로 업데이트하는 경우.
 * 하이드레이션 과정: ISR로 생성된 정적 HTML이 클라이언트로 전송된 후, 클라이언트 측에서 React가 이 HTML을 하이드레이트한다.
 
 ### (3).하이드레이션이 발생하지 않는 케이스
 
-#### 1.클라이언트 사이드 렌더링(CSR):
+#### 클라이언트 사이드 렌더링(CSR):
 * 케이스: useEffect 같은 훅을 사용하여 클라이언트 측에서 데이터를 가져오는 경우.
 * 하이드레이션 과정 없음: CSR은 클라이언트에서 처음부터 렌더링되므로, 서버에서 렌더링된 HTML을 하이드레이트할 필요가 없다.
 
-#### 2.정적 콘텐츠:
+#### 정적 콘텐츠:
 * 케이스: API 호출이나 동적 데이터 패칭이 없는 경우, 정적 파일로만 제공되는 경우.
 * 하이드레이션 과정 없음: 정적 콘텐츠는 상호작용이 필요하지 않으므로, 하이드레이션이 필요하지 않다.
 
