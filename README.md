@@ -13,7 +13,7 @@ Turbopack은 HMR을 지원하여, 코드 변경 시 전체 페이지를 새로 �
 Turbopack은 증분 빌드를 지원하여, 변경된 파일만 다시 빌드합니다. 이를 통해 전체 빌드 시간을 줄이고, 대규모 프로젝트에서 특히 유용하다.
 
 ### 4. Zero Configuration:
-Turbopack은 가능한 한 많은 기본 설정을 제공하여, 개발자가 복잡한 설정 없이 쉽게 사용할 수 있도록 합니다. 즉, 기본적인 사용에 있어 별도의 설정 없이도 작동한다.
+Turbopack은 가능한 한 많은 기본 설정을 제공하여, 개발자가 복잡한 설정 없이 쉽게 사용할 수 있도록 한다. 즉, 기본적인 사용에 있어 별도의 설정 없이도 작동한다.
 Turbopack에 대한 설정을 수정하고 싶으면 next.config.js 파일에서 수정해주면 된다.
 
 ```javascript
@@ -62,10 +62,12 @@ Next.js 13에서 도입된 새로운 라우팅 시스템으로, app/ 디렉토�
 app/
 ├── layout.js
 ├── ClientComponent.js
+├── ServerComponent.js
 └── page.js
 ```
 
 ```javascript
+// layout.js (서버 컴포넌트)
 export default function Layout({ children }) {
   return (
     <div>
@@ -76,21 +78,34 @@ export default function Layout({ children }) {
     </div>
   );
 }
-```
-```javascript
+
+//page.js (서버 컴포넌트)
+import ServerComponent from './ServerComponent';
 import ClientComponent from './ClientComponent';
 
 export default function HomePage() {
   return (
     <div>
       <h1>Home Page</h1>
+      <ServerComponent />
       <ClientComponent />
     </div>
   );
 }
-```
-```javascript
-// 클라이언트 컴포넌트
+
+export default async function ServerComponent() {
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+  const data = await res.json();
+
+  return (
+    <div>
+      <h2>Server-Side Data</h2>
+      <p>Title: {data.title}</p>
+      <p>Body: {data.body}</p>
+    </div>
+  );
+}
+
 'use client';
 
 export default function ClientComponent() {
