@@ -1122,9 +1122,89 @@ export default async function ProductPage() {
 
 ### (4).추가 고려사항
 * 하이드레이션 성능: 하이드레이션은 클라이언트 측에서 추가적인 JavaScript 실행을 필요로 하므로, 성능에 영향을 미칠 수 있다. 이를 최적화하기 위해 불필요한 JavaScript 로드를 줄이고, 필요한 부분만 하이드레이트하는 전략을 사용할 수 있다.
+* 예를 들어, dynamic import를 사용하여 클라이언트 측에서만 필요한 컴포넌트를 로드할 수 있다.
+
+```javascript
+// pages/index.js
+
+import dynamic from 'next/dynamic';
+
+// 클라이언트 측에서만 로드되는 컴포넌트
+const ClientOnlyComponent = dynamic(() => import('../components/ClientOnlyComponent'), {
+  ssr: false, // 서버 사이드 렌더링 비활성화
+});
+
+export default function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to the Home Page</h1>
+      <ClientOnlyComponent />
+    </div>
+  );
+}
+```
+  
 * 하이드레이션 오류: 서버에서 렌더링된 HTML과 클라이언트에서의 React 상태가 일치하지 않으면 하이드레이션 오류가 발생할 수 있다. 이를 방지하기 위해 서버와 클라이언트의 렌더링 결과가 일치하도록 주의해야 한다.
 
 
+```javascript
+// as-is
+import { useEffect, useState } from 'react';
+
+export default function HomePage() {
+  // 클라이언트에서만 초기화되는 상태
+  const [count, setCount] = useState(() => {
+    // 클라이언트에서만 접근 가능한 로컬 스토리지 사용
+    if (typeof window !== 'undefined') {
+      const savedCount = localStorage.getItem('count');
+      return savedCount ? parseInt(savedCount, 10) : 0;
+    }
+    return 0; // 서버에서 렌더링 시 기본값
+  });
+
+  useEffect(() => {
+    // 상태가 변경될 때마다 로컬 스토리지에 저장
+    localStorage.setItem('count', count);
+  }, [count]);
+
+  return (
+    <div>
+      <h1>Counter: {count}</h1>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+```javascript
+// to-be
+import { useEffect, useState } from 'react';
+
+export default function HomePage() {
+  // 서버와 클라이언트에서 동일한 초기 상태를 유지
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // 클라이언트에서만 실행되는 로직
+    const savedCount = localStorage.getItem('count');
+    if (savedCount) {
+      setCount(parseInt(savedCount, 10));
+    }
+  }, []);
+
+  useEffect(() => {
+    // 상태가 변경될 때마다 로컬 스토리지에 저장
+    localStorage.setItem('count', count);
+  }, [count]);
+
+  return (
+    <div>
+      <h1>Counter: {count}</h1>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
 # 10.Catch-All Routes
 Next.js의 Catch-All Routes를 사용하여 URL 경로를 처리할 때, 인자의 개수에 따라 다양한 방식으로 경로를 매핑할 수 있다. 예를 들어, /archive와 같은 경로는 인자가 없고, /archive/2024와 같은 경로는 하나의 인자를, /archive/2024/3과 같은 경로는 두 개의 인자를 캐치할 수 있
 다. 이를 통해 복잡한 URL 구조를 유연하게 처리할 수 있다.
