@@ -1014,19 +1014,19 @@ export default async function ProductPage() {
   const product = await fetchProduct()
 
   return (
-    <div>
-      <ProductInfo product={product} />
-      
-      {/* Reviews는 독립적으로 로딩 (2초) */}
-      <Suspense fallback={<ReviewsSkeleton />}>
-        <Reviews />
-      </Suspense>
+    <Suspense fallback={<div>Loading entire page...</div>}>
+      <div>
+        <ProductInfo product={product} />
+        
+        <Suspense fallback={<ReviewsSkeleton />}>
+          <Reviews />
+        </Suspense>
 
-      {/* Recommendations도 독립적으로 로딩 (3초) */}
-      <Suspense fallback={<RecommendationsSkeleton />}>
-        <Recommendations />
-      </Suspense>
-    </div>
+        <Suspense fallback={<RecommendationsSkeleton />}>
+          <Recommendations />
+        </Suspense>
+      </div>
+    </Suspense>
   )
 }
 ```
@@ -1042,10 +1042,10 @@ export default async function ProductPage() {
 6초: 전체 페이지 표시
 
 // Streaming SSR의 타임라인
-0초: 로딩 UI 표시
+0초: 빈 화면 또는 서버에서 준비된 부분만 표시
 1초: ProductInfo 표시
-2초: Reviews 표시
-3초: Recommendations 표시
+2초: Reviews 로딩 UI 표시 → Reviews 표시
+3초: Recommendations 로딩 UI 표시 → Recommendations 표시
 ```
 
 ### (5).시각적 비교
@@ -1053,7 +1053,7 @@ export default async function ProductPage() {
 // 기존 SSR
 ┌────────────────────┐
 │                    │
-│     Loading...     │ (6초 동안)
+│        빈화면        │ (6초 동안)
 │                    │
 └────────────────────┘
            ↓
@@ -1083,19 +1083,7 @@ export default async function ProductPage() {
 └────────────────────┘
 ```
 
-### (6).장점:
-* 더 빠른 초기 로딩
-* 더 나은 사용자 경험
-* 서버 리소스 효율적 사용
-* 점진적인 페이지 로드
-
-### (7).단점:
-* 구현 복잡도 증가
-* 컴포넌트 설계 신중 필요
-* 로딩 상태 관리 필요
-* Streaming SSR은 특히 데이터 의존성이 많은 큰 페이지에서 사용자 경험을 크게 개선할 수 있습니다.
-
-### (8).Streaming SSR에서 Suspense의 역할
+### (86.Streaming SSR에서 Suspense의 역할
 * 점진적 렌더링: Suspense를 사용하면 페이지의 일부를 먼저 렌더링하고, 나머지 부분은 데이터가 준비되는 대로 렌더링할 수 있다. 이는 사용자에게 더 빠른 초기 로딩 경험을 제공한다.
 * 비동기 데이터 로딩: Suspense는 비동기적으로 데이터를 로딩하는 컴포넌트를 감싸고, 데이터가 준비될 때까지 대체 UI(예: 로딩 스피너)를 보여줄 수 있다.
 * 사용자 경험 개선: 페이지의 중요한 부분을 먼저 보여주고, 덜 중요한 부분은 나중에 로딩함으로써 사용자 경험을 개선할 수 있다.
