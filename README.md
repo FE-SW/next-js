@@ -656,57 +656,134 @@ Error.getInitialProps = ({ res, err }) => {
 # 4.보호된 파일
 보호된 파일(Protected Files)은 각 파일이 특정한 역할을 수행하며, 애플리케이션의 구조와 동작 방식을 정의하는 중요한 요소들이다.
 
-### page.js (App Router)
-* 설명: 해당 라우팅 경로에 접속했을 때 기본적으로 표시되는 유니크한 페이지를 정의한다.
-* 예시: app/dashboard/page.js는 /dashboard 경로에 접속할 때 보여지는 대시보드 페이지이다.
+### App Router
 
-#### layout.js (App Router)
-* 설명: 여러 하위 페이지에 공통적으로 적용되는 레이아웃을 정의하는 파일
-* 예시: app/dashboard/layout.js는 대시보드 하위 페이지들(예: /dashboard/overview, /dashboard/settings)에 공통적으로 적용되는 레이아웃을 제공
+#### page.js
+* **설명**: 해당 라우팅 경로에 접속했을 때 기본적으로 표시되는 유니크한 페이지를 정의한다.
+* **예시**: `app/dashboard/page.js`는 `/dashboard` 경로에 접속할 때 보여지는 대시보드 페이지이다.
 
-### not-found.js (App Router)
-* 설명: 존재하지 않는 페이지에 접근했을 때 표시되는 오류 페이지를 정의
-* 예시: 사용자가 /invalid-route에 접근할 때 보여지는 "페이지를 찾을 수 없습니다" 메시지를 포함
+#### layout.js
+* **설명**: 여러 하위 페이지에 공통적으로 적용되는 레이아웃을 정의하는 파일
+* **예시**: `app/dashboard/layout.js`는 대시보드 하위 페이지들(예: `/dashboard/overview`, `/dashboard/settings`)에 공통적으로 적용되는 레이아웃을 제공
 
-### error.js (App Router)
-* 설명: 예상치 못한 오류가 발생했을 때 표시되는 오류 페이지를 정의
-* 예시: 서버 오류가 발생했을 때 사용자에게 보여주는 오류 메시지를 포함
+#### not-found.js
+* **설명**: 존재하지 않는 페이지에 접근했을 때 표시되는 오류 페이지를 정의
+* **예시**: 사용자가 `/invalid-route`에 접근할 때 보여지는 "페이지를 찾을 수 없습니다" 메시지를 포함
 
-### loading.js (App Router)
-* 설명: 페이지 로딩 중에 표시되는 로딩 페이지를 정의한다.
-* 예시: 데이터가 로드되는 동안 사용자가 볼 수 있는 스피너나 로딩 메시지를 포함
+#### error.js
+* **설명**: 예상치 못한 오류가 발생했을 때 표시되는 오류 페이지를 정의
+* **예시**: 서버 오류가 발생했을 때 사용자에게 보여주는 오류 메시지를 포함
 
-### route.js (App Router)
-* 설명: 서버 측 라우팅을 위한 코드를 포함하는 파일이다. API 라우트를 정의하는 데 사용
-* 예시: app/api/users/route.js는 사용자 정보를 가져오는 API 엔드포인트를 정의
+#### loading.js
+* **설명**: 페이지 로딩 중에 표시되는 로딩 페이지를 정의한다.
+* **예시**: 데이터가 로드되는 동안 사용자가 볼 수 있는 스피너나 로딩 메시지를 포함
 
-### default.js (App Router)
-* 설명: 특정 라우팅 경로에 대한 기본 페이지 역할을 하는 파일
-* 예시: / 경로에 대한 기본 페이지를 설정할 수 있다.
+#### route.js
+* **설명**: 서버 측 라우팅을 위한 코드를 포함하는 파일이다. API 라우트를 정의하는 데 사용
+* **예시**: `app/api/users/route.js`는 사용자 정보를 가져오는 API 엔드포인트를 정의
 
-### instrumentation.js (App Router)
-* 설명: 코드 분석 및 디버그, 성능 추적을 위한 코드를 포함하는 파일
-* 예시: 앱의 성능을 모니터링하고 분석하기 위한 코드가 포함될 수 있다.
+```javascript
+// app/api/users/route.js
 
-### middleware.js (공통)
-* 설명: 페이지 요청 및 응답을 가로채고 처리하는 미들웨어 함수를 포함하는 파일
-* 예시: 인증 확인, 로깅 또는 요청 변환 등의 작업을 수행할 수 있다.
+// 사용자 정보를 가져오는 GET 요청 핸들러
+export async function GET(req) {
+  const users = await fetch('https://api.example.com/users').then(res => res.json());
+  return new Response(JSON.stringify(users), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
-### template.js (App Router)
-* 설명: 페이지 템플릿을 정의하는 파일
-* 예시: 여러 페이지에 공통적으로 적용되는 템플릿을 정의하여 재사용성을 높인다.
+// 새로운 사용자를 추가하는 POST 요청 핸들러
+export async function POST(req) {
+  const newUser = await req.json();
+  // 데이터베이스에 사용자를 저장하는 가상의 함수
+  const savedUser = await saveUserToDatabase(newUser);
+  return new Response(JSON.stringify(savedUser), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+```
 
-### _app.js (Page Router)
-* 설명: Next.js 애플리케이션의 전역 레이아웃을 정의하는 파일이다. 모든 페이지에 공통적으로 적용되는 설정이나 레이아웃을 설정한다.
-* 예시: 전역 스타일, 테마, 상단 내비게이션 바 등을 포함할 수 있다.
+#### template.js
+* **설명**: 페이지 템플릿을 정의하는 파일
+* **예시**: 여러 페이지에 공통적으로 적용되는 템플릿을 정의하여 재사용성을 높인다.
 
-### getStaticProps.js (Page Router)
-* 설명: 정적 사이트 생성(SSG)을 위해 서버 측에서 데이터를 패치하고 페이지를 렌더링하는 함수를 정의
-* 예시: 빌드 시 API에서 데이터를 가져와 정적 페이지를 생성한다.
+```javascript
+// app/template.js
 
-### getServerSideProps.js (Page Router)
-* 설명: 서버 측에서 데이터를 패치하고 페이지를 렌더링하기 전에 실행되는 함수를 정의
-* 예시: 사용자의 요청에 따라 실시간 데이터를 가져와 페이지를 생성한다.
+export default function Template({ children, title }) {
+  return (
+    <div>
+      <header>
+        <h1>{title}</h1>
+        <nav>
+          <a href="/">홈</a>
+          <a href="/about">소개</a>
+        </nav>
+      </header>
+      <main>{children}</main>
+      <footer>
+        <p>&copy; 2023 My Company</p>
+      </footer>
+    </div>
+  );
+}
+```
+
+### Page Router
+
+#### _app.js
+* **설명**: Next.js 애플리케이션의 전역 레이아웃을 정의하는 파일이다. 모든 페이지에 공통적으로 적용되는 설정이나 레이아웃을 설정한다.
+* **예시**: 전역 스타일, 테마, 상단 내비게이션 바 등을 포함할 수 있다.
+
+#### _document.js
+* **설명**: HTML 문서의 구조를 커스터마이즈할 수 있는 파일이다. 서버에서만 렌더링되며, 클라이언트 측에서는 실행되지 않는다.
+* **예시**: `<html>`, `<head>`, `<body>` 태그를 커스터마이즈할 수 있다.
+
+#### 404.js
+* **설명**: 존재하지 않는 페이지에 접근했을 때 표시되는 404 오류 페이지를 정의한다.
+* **예시**: 사용자가 잘못된 URL에 접근했을 때 보여지는 "페이지를 찾을 수 없습니다" 메시지를 포함한다.
+
+#### 500.js
+* **설명**: 서버 오류가 발생했을 때 표시되는 500 오류 페이지를 정의한다.
+* **예시**: 서버에서 예기치 않은 오류가 발생했을 때 사용자에게 보여주는 오류 메시지를 포함한다.
+
+#### _error.js
+* **설명**: Next.js에서 모든 오류 페이지를 커스터마이즈할 수 있는 파일이다. 404, 500과 같은 특정 오류 페이지를 정의하지 않았을 때 기본적으로 사용된다.
+* **예시**: 모든 종류의 오류에 대해 사용자에게 보여줄 기본 오류 메시지를 포함한다.
+
+```javascript
+// pages/_error.js
+
+function Error({ statusCode }) {
+  return (
+    <p>
+      {statusCode
+        ? `서버에서 ${statusCode} 오류가 발생했습니다.`
+        : '클라이언트에서 오류가 발생했습니다.'}
+    </p>
+  );
+}
+
+Error.getInitialProps = ({ res, err }) => {
+  const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
+  return { statusCode };
+};
+```
+
+#### getStaticProps.js
+* **설명**: 정적 사이트 생성(SSG)을 위해 서버 측에서 데이터를 패치하고 페이지를 렌더링하는 함수를 정의한다.
+* **예시**: 빌드 시 API에서 데이터를 가져와 정적 페이지를 생성한다.
+
+#### getServerSideProps.js
+* **설명**: 서버 측에서 데이터를 패치하고 페이지를 렌더링하기 전에 실행되는 함수를 정의한다.
+* **예시**: 사용자의 요청에 따라 실시간 데이터를 가져와 페이지를 생성한다.
+
+### 공통
+
+#### middleware.js
+* **설명**: 페이지 요청 및 응답을 가로채고 처리하는 미들웨어 함수를 포함하는 파일
+* **예시**: 인증 확인, 로깅 또는 요청 변환 등의 작업을 수행할 수 있다.
 
 # 5.이미지 최적화
 Next.js에서 제공하는 Image 컴포넌트는 이미지 최적화를 위해 여러 가지 기능을 지원한다. 이를 통해 성능을 향상시키고 사용자 경험을 개선할 수 있다.
