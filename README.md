@@ -1255,4 +1255,268 @@ export default ArchivePage;
 * 인자 두 개 (/archive/2024/3):
 두 개의 인자가 캐치된다. 예를 들어, 첫 번째 인자는 연도(2024), 두 번째 인자는 월(3)으로 해석될 수 있다.
 
+# 11.MiddleWare
+Next.js의 미들웨어는 요청이 서버에 도달하기 전에 실행되며, 요청을 수정하거나 응답을 조작할 수 있다. 미들웨어는 프로젝트의 루트에 middleware.js 파일을 생성하여 설정할 수 있다. 이 파일은 Next.js의 모든 요청에 대해 실행한다. 
+다양한 시나리오에서 유용하게 사용될 수 있으며, 애플리케이션의 보안, 성능, 사용자 경험을 개선하는 데 큰 도움이 된다. 미들웨어를 적절히 활용하여 애플리케이션의 동작을 세밀하게 제어할 수 있다.
 
+### (1).특징
+* 경량: 미들웨어는 빠르게 실행되며, 서버리스 환경에서 작동한다.
+* 유연성: 요청을 가로채고, 수정하거나, 리다이렉트할 수 있다.
+* 보안: 인증 및 권한 부여 로직을 구현하여 보안을 강화할 수 있다.
+* HTML 응답 제한: 미들웨어는 HTML 응답을 직접 생성할 수 없습니다. 대신, 요청을 수정하거나 리다이렉트하는 데 사용된다.
+* 서버리스 환경: 미들웨어는 서버리스 환경에서 실행되므로, 서버 상태를 유지할 수 없다. 모든 요청은 독립적으로 처리된다.
+
+### (2).사용예시
+
+#### 인증 및 권한 부여
+사용자가 특정 페이지에 접근하기 전에 인증 여부를 확인하고, 인증되지 않은 사용자를 로그인 페이지로 리다이렉트할 수 있다.
+
+```javascript
+// middleware.js
+import { NextResponse } from 'next/server';
+
+export function middleware(req) {
+  const token = req.cookies.get('authToken');
+
+  if (!token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
+```
+
+#### 로깅 및 분석
+모든 요청에 대해 로깅을 수행하여, 요청의 메타데이터를 기록할 수 있다. 이를 통해 사용자 행동을 분석하고, 애플리케이션의 성능을 모니터링할 수 있다.
+
+```javascript
+// middleware.js
+export function middleware(req) {
+  console.log(`Request URL: ${req.url}`);
+  console.log(`Request Method: ${req.method}`);
+  console.log(`User Agent: ${req.headers.get('user-agent')}`);
+
+  return NextResponse.next();
+}
+```
+
+#### A/B 테스트
+사용자를 두 그룹으로 나누어 서로 다른 페이지를 제공함으로써, A/B 테스트를 수행할 수 있다.
+
+```javascript
+import { NextResponse } from 'next/server';
+
+export function middleware(req) {
+  const url = req.nextUrl.clone();
+  const variant = Math.random() < 0.5 ? 'A' : 'B';
+
+  if (variant === 'A') {
+    url.pathname = '/variant-a';
+  } else {
+    url.pathname = '/variant-b';
+  }
+
+  return NextResponse.rewrite(url);
+}
+```
+
+#### A/B 테스트
+사용자의 IP 주소를 기반으로 지역을 감지하고, 해당 지역에 맞는 페이지로 리다이렉트할 수 있다.
+
+```javascript
+import { NextResponse } from 'next/server';
+
+export function middleware(req) {
+  const country = req.geo.country || 'US';
+  const url = req.nextUrl.clone();
+
+  if (country === 'KR') {
+    url.pathname = '/ko';
+  } else if (country === 'FR') {
+    url.pathname = '/fr';
+  } else {
+    url.pathname = '/en';
+  }
+
+  return NextResponse.rewrite(url);
+}
+```
+
+#### 비동기 작업 
+
+```javascript 
+// middleware.js
+import { NextResponse } from 'next/server';
+import { MongoClient } from 'mongodb';
+
+const uri = 'your-mongodb-connection-string';
+const client = new MongoClient(uri);
+
+async function connectToDatabase() {
+  if (!client.isConnected()) {
+    await client.connect();
+  }
+  return client.db('your-database-name');
+}
+
+async function fetchUserFromDatabase(token) {
+  const db = await connectToDatabase();
+  const usersCollection = db.collection('users'); 
+
+  const user = await usersCollection.findOne({ authToken: token });
+
+  return user;
+}
+
+export async function middleware(req) {
+  const token = req.cookies.get('authToken');
+
+  if (!token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  const user = await fetchUserFromDatabase(token);
+
+  if (!user) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  // 사용자 정보가 유효한 경우 요청을 계속 진행
+  return NextResponse.next();
+}
+```
+
+### (3).미들웨어의 위치와 적용 범위
+middleware.js 파일은 프로젝트의 루트에 위치하며, 기본적으로 모든 경로에 대해 실행된다. 특정 경로에만 미들웨어를 적용하려면, middleware.js 내에서 조건문을 사용하여 경로를 필터링하거나, matcher 옵션을 사용하여 특정 경로에만 미들웨어를 적용할 수 있다.
+
+```javascript 
+import { NextResponse } from 'next/server';
+
+export function middleware(req) {
+  const { pathname } = req.nextUrl;
+
+  // 특정 경로에만 미들웨어 로직 적용
+  if (pathname.startsWith('/protected')) {
+    const token = req.cookies.get('authToken');
+
+    if (!token) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // 다른 경로는 그대로 진행
+  return NextResponse.next();
+}
+```
+
+```javascript
+   // next.config.js
+   module.exports = {
+     middleware: {
+       matcher: ['/api/:path*', '/dashboard/:path*'], // 특정 경로에만 미들웨어 적용
+     },
+   };
+```
+
+# 12.i18n
+Next.js의 국제화 기능은 다국어 웹사이트를 쉽게 구축할 수 있도록 도와줍니다. 기본적으로 next.config.js 파일에서 i18n 설정을 추가하면, Next.js는 자동으로 각 언어에 대한 경로를 생성한다.다국어 콘텐츠를 제공하기 위해서는 몇 가지 추가적인 설정과 코드가 필요하다.
+
+### (1).기본설정
+
+```javascript 
+// next.config.js
+module.exports = {
+  i18n: {
+    locales: ['en', 'fr', 'de'], // 지원할 언어 목록
+    defaultLocale: 'en', // 기본 언어
+  },
+};
+```
+
+### (2).언어별 콘텐츠 준비
+각 언어에 대한 번역 파일을 준비해야 한다. 일반적으로 public/locales 디렉토리에 언어별 JSON 파일을 생성한다.
+
+```javascript
+   public/
+   └── locales/
+       ├── en/
+       │   └── common.json
+       ├── fr/
+       │   └── common.json
+       └── de/
+           └── common.json
+```
+```javascript
+   {
+     "welcome": "Welcome to our website!",
+     "description": "This is a sample description."
+   }
+```
+
+### (3).next-i18next 패키지 설치
+Next.js의 i18n 기능을 더 쉽게 사용하기 위해 next-i18next 패키지를 사용할 수 있다. 이 패키지는 번역 파일을 로드하고, 번역을 쉽게 사용할 수 있는 훅을 제공한다.
+
+```javascript 
+  npm install next-i18next react-i18next
+```
+
+### (4).next-i18next 설정
+프로젝트 루트에 next-i18next.config.js 파일을 생성하고, 설정을 추가한다.
+
+```javascript 
+  // next-i18next.config.js
+   module.exports = {
+     i18n: {
+       locales: ['en', 'fr', 'de'],
+       defaultLocale: 'en',
+     },
+   };
+```
+
+### (5).18n 지원을 위한 HOC 사용
+_app.js 파일에서 appWithTranslation HOC를 사용하여 i18n 기능을 활성화한다.
+
+```javascript 
+  npm install next-i18next react-i18next
+```
+
+### (6).번역 사용
+페이지 컴포넌트에서 useTranslation 훅을 사용하여 번역을 적용한다.
+
+```javascript 
+   import { useTranslation } from 'next-i18next';
+
+   export default function Home() {
+     const { t } = useTranslation('common');
+
+     return (
+       <div>
+         <h1>{t('welcome')}</h1>
+         <p>{t('description')}</p>
+       </div>
+     );
+   }
+```
+
+### (7).서버 사이드 번역 지원
+각 페이지에서 getStaticProps 또는 getServerSideProps를 사용하여 번역을 미리 로드할 수 있다.
+
+```javascript 
+   import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+   export async function getStaticProps({ locale }) {
+     return {
+       props: {
+         ...(await serverSideTranslations(locale, ['common'])),
+       },
+     };
+   }
+```
