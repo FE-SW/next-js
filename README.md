@@ -870,6 +870,7 @@ export default function TodoForm() {
 
 # 7.Metadata API
 Metadata API는 Next.js 13에서 도입된 새로운 메타데이터 관리 시스템으로, SEO와 소셜 미디어 공유를 위한 메타데이터를 더 쉽게 관리할 수 있게 해준다.
+Metadata API를 사용할 때, 메타데이터를 설정하기 위해 export만 해주면 된다. Next.js는 이 메타데이터를 자동으로 처리하여 HTML 문서의 <head>에 반영한다. 따라서, 별도의 추가 작업 없이도 메타데이터가 페이지에 적용된다.
 
 ### (1).정적 메타데이터
 ```javascript
@@ -895,11 +896,36 @@ export const metadata = {
     images: ['https://example.com/og.jpg'],
   },
 }
+
+export default function Layout({ children }) {
+  return (
+    <div>
+      <header>
+        <h1>My Website</h1>
+      </header>
+      <main>{children}</main>
+      <footer>
+        <p>&copy; 2023 My Website</p>
+      </footer>
+    </div>
+  );
+}
+
+// app/page.js
+import Layout from './layout';
+
+export default function HomePage() {
+  return (
+    <Layout>
+      <h2>Welcome to the Home Page</h2>
+      <p>This is the main content of the home page.</p>
+    </Layout>
+  );
+}
 ```
 
 ### (2).동적 메타데이터
-
- Next.js 13부터는 generateMetadata 함수를 페이지 컴포넌트와 같은 파일에 export하기만 하면 자동으로 메타데이터가 적용된다.
+Next.js 13부터는 generateMetadata 함수를 페이지 컴포넌트와 같은 파일에 export하기만 하면 자동으로 메타데이터가 적용된다.
 
 ```javascript
 // app/products/[id]/page.tsx
@@ -923,6 +949,28 @@ export async function generateMetadata({ params }) {
       site: '@yourWebsiteTwitter',     
     },
   }
+}
+
+export default function ProductPage({ params }) {
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      const data = await getPost(params.id);
+      setProduct(data);
+    }
+    fetchProduct();
+  }, [params.id]);
+
+  if (!product) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <h1>{product.title}</h1>
+      <p>{product.description}</p>
+      <img src={product.ogImage} alt={product.title} />
+    </div>
+  );
 }
 ```
 
