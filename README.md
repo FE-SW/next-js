@@ -408,6 +408,29 @@ export default function UserNotFoundPage() {
 }
 ```
 
+### (7).그룹 라우팅(Route Groups)
+
+* 설명: 폴더명을 괄호(())로 감싸면 URL 경로에 포함되지 않고 라우트를 논리적으로 그룹화할 수 있는 기능
+* 예시: app/(marketing)/about/page.js는 /about 경로로 접근할 수 있으며, '(marketing)' 부분은 URL 경로에 포함되지 않음
+
+```javascript
+app/
+├── (marketing)/ // URL 경로에 포함되지 않음
+│   ├── layout.js  // 마케팅 관련 페이지에 적용되는 레이아웃
+│   ├── about/
+│   │   └── page.js // /about으로 접근 가능
+│   └── contact/
+│       └── page.js // /contact로 접근 가능
+│
+├── (shop)/ // URL 경로에 포함되지 않음
+│   ├── layout.js // 쇼핑 관련 페이지에 적용되는 레이아웃
+│   ├── products/
+│   │   └── page.js // /products로 접근 가능
+│   └── cart/
+│       └── page.js // /cart로 접근 가능
+│
+└── layout.js // 전체 애플리케이션에 적용되는 루트 레이아웃
+```
 
 # 3.Page Router
 페이지 라우터는 Next.js의 전통적인 라우팅 시스템 방식이다. 파일기반으로 라우팅되며, pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생성된다. getStaticProps, getServerSideProps와 같은 데이터 패칭 메서드를 사용한다.
