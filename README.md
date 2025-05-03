@@ -1470,7 +1470,71 @@ export function middleware(req) {
 * 장점: 검색 엔진 최적화(SEO)에 유리하며, 검색 엔진이 페이지를 더 잘 크롤링할 수 있도록 한다.
 
 
-# 13.i18n
+# 13. 동적 라우팅 [slug]
+
+* 설명: 동적 라우팅은 URL의 일부를 변수로 사용하여 다양한 페이지를 생성할 수 있는 기능이다.
+* 예시: app/blog/[slug]/page.js는 /blog/my-post, /blog/another-post 등의 동적 경로를 처리할 수 있다.
+
+
+```javascript
+// app/blog/[slug]/page.js
+export default function BlogPost({ params }) {
+  // params.slug에 URL의 동적 부분이 포함됨 (예: 'my-post')
+  return (
+    <div>
+      <h1>블로그 포스트: {params.slug}</h1>
+      <p>블로그 내용이 여기에 표시됩니다.</p>
+    </div>
+  );
+}
+```
+
+### 다중 동적 세그먼트: 여러 개의 동적 세그먼트를 조합하여 사용할 수 있다.
+
+```javascript
+// app/products/[category]/[id]/page.js
+export default function ProductPage({ params }) {
+  // params.category와 params.id를 사용할 수 있음
+  return (
+    <div>
+      <h1>카테고리: {params.category}</h1>
+      <h2>제품 ID: {params.id}</h2>
+    </div>
+  );
+}
+```
+
+### 선택적 캐치올 라우팅: [...slug] 형식을 사용하여 여러 경로 세그먼트를 한 번에 처리할 수 있다.
+
+```javascript
+// app/docs/[...slug]/page.js
+export default function DocsPage({ params }) {
+  // /docs/a/b/c에 접근하면 params.slug는 ['a', 'b', 'c'] 배열이 됨
+  return (
+    <div>
+      <h1>문서 경로: {params.slug.join('/')}</h1>
+    </div>
+  );
+}
+```
+
+### 선택적 캐치올 라우팅: [[...slug]] 형식은 라우트 매개변수가 없는 경우(루트 경로)도 처리할 수 있다.
+
+```javascript
+// app/docs/[[...slug]]/page.js
+export default function DocsPage({ params }) {
+  // /docs에 접근하면 params.slug는 undefined
+  // /docs/a/b에 접근하면 params.slug는 ['a', 'b'] 배열이 됨
+  const path = params.slug ? params.slug.join('/') : '루트';
+  return (
+    <div>
+      <h1>문서 경로: {path}</h1>
+    </div>
+  );
+}
+```
+
+# 14.i18n
 Next.js의 국제화 기능은 다국어 웹사이트를 쉽게 구축할 수 있도록 도와줍니다. 기본적으로 next.config.js 파일에서 i18n 설정을 추가하면, Next.js는 자동으로 각 언어에 대한 경로를 생성한다.다국어 콘텐츠를 제공하기 위해서는 몇 가지 추가적인 설정과 코드가 필요하다.
 
 ### (1).기본설정
