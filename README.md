@@ -665,6 +665,7 @@ Error.getInitialProps = ({ res, err }) => {
 #### layout.js
 * **설명**: 여러 하위 페이지에 공통적으로 적용되는 레이아웃을 정의하는 파일
 * **예시**: `app/dashboard/layout.js`는 대시보드 하위 페이지들(예: `/dashboard/overview`, `/dashboard/settings`)에 공통적으로 적용되는 레이아웃을 제공
+* **template 차이점**: 페이지 이동 시 유지된다. 즉, 레이아웃은 한 번 렌더링된 후 페이지 전환 시에도 다시 렌더링되지 않는다.
 
 #### not-found.js
 * **설명**: 존재하지 않는 페이지에 접근했을 때 표시되는 오류 페이지를 정의
@@ -707,6 +708,7 @@ export async function POST(req) {
 #### template.js
 * **설명**: 페이지 템플릿을 정의하는 파일
 * **예시**: 여러 페이지에 공통적으로 적용되는 템플릿을 정의하여 재사용성을 높인다.
+* **layout 차이점**: 페이지 이동할 때마다 새롭게 리렌더링된다. 매 페이지 전환마다 템플릿이 다시 생성된다.
 
 ```javascript
 // app/template.js
