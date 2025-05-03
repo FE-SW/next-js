@@ -732,6 +732,24 @@ export default function Template({ children, title }) {
 }
 ```
 
+### default.js
+
+* 설명: Parallel 라우팅에서 기본으로 렌더링될 콘텐츠를 정의하는 파일
+* 예시: app/@dashboard/default.js는 Parallel 라우팅에서 /dashboard 슬롯이 명시적으로 요청되지 않았을 때 보여지는 기본 콘텐츠를 정의
+* Parallel 라우팅에서의 사용: 슬롯(slot)이 없을 때 폴백(fallback)으로 표시되는 내용을 제공하며, 사용자가 해당 라우트를 직접 방문하지 않았을 때의 초기 상태를 정의함
+
+```javascript
+// app/@dashboard/default.js
+export default function DashboardDefault() {
+  return (
+    <div>
+      <h2>대시보드 기본 뷰</h2>
+      <p>왼쪽 메뉴에서 원하는 항목을 선택하세요.</p>
+    </div>
+  );
+}
+```
+
 ### (2).Page Router
 
 #### _app.js
