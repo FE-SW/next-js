@@ -322,6 +322,59 @@ app/
 4.사용자가 브라우저의 주소창에 직접 /feed/[postId]를 입력하면, 인터셉트 없이 전체 페이지 버전이 로드된다.
 
 
+#### 주의점
+인터셉팅 라우팅은 클라이언트 측 네비게이션을 통해서만 제대로 동작한다. 이는 다음과 같은 제한사항을 의미한다
+
+* 클라이언트 네비게이션 필수: 인터셉팅 라우팅은 <Link> 컴포넌트나 router.push(), router.replace() 같은 클라이언트 측 네비게이션을 통해 이동할 때만 동작한다.
+* 서버 리다이렉트 비호환: redirect() 함수나 permanentRedirect() 함수 같은 서버 측 리다이렉션을 사용하면 인터셉팅이 동작하지 않는다.
+
+```javascript
+// ✅ 인터셉팅 라우팅이 작동하는 경우
+// app/feed/page.js
+import Link from 'next/link';
+
+export default function FeedPage() {
+  return (
+    <div>
+      <h1>피드</h1>
+      <ul>
+        {/* Link 태그를 사용하면 인터셉팅 라우팅이 작동함 */}
+        <Link href={`/feed/1`}>첫 번째 게시물</Link>
+      </ul>
+    </div>
+  );
+}
+
+// ✅ 인터셉팅 라우팅이 작동하는 경우
+// 클라이언트 컴포넌트에서
+'use client';
+import { useRouter } from 'next/navigation';
+
+export default function ClientComponent() {
+  const router = useRouter();
+  
+  const handleClick = () => {
+    // router.push()를 사용하면 인터셉팅 라우팅이 작동함
+    router.push('/feed/1');
+  };
+  
+  return <button onClick={handleClick}>게시물 보기</button>;
+}
+
+// ❌ 인터셉팅 라우팅이 작동하지 않는 경우
+// 서버 액션이나 서버 컴포넌트에서
+import { redirect } from 'next/navigation';
+
+export default async function ServerComponent() {
+  if (someCondition) {
+    // redirect() 함수를 사용하면 인터셉팅 라우팅이 작동하지 않음
+    redirect('/feed/1');
+  }
+  
+  return <div>컨텐츠</div>;
+}
+```
+
 
 #### 중첩 라우팅 vs 병렬 라우팅 vs 인터셉팅 라우팅 차이점 요약
 
