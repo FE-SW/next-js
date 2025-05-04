@@ -469,6 +469,30 @@ export default function UserNotFoundPage() {
 }
 ```
 
+### (9).private 폴더
+프라이빗 폴더는 앱 라우터에서 라우팅에 포함되지 않는 폴더를 정의하는 방법이다. 폴더 이름 앞에 밑줄(_)을 붙이면 해당 폴더는 라우팅 시스템에서 제외되며, 컴포넌트 구성, 유틸리티 함수, 스타일 등을 구성하는 데 사용될 수 있다.
+
+```javascript
+app/
+├── _components/          // 프라이빗 폴더 - 라우팅에 포함되지 않음
+│   ├── Button.js
+│   └── Card.js
+├── _utils/              // 프라이빗 폴더 - 라우팅에 포함되지 않음
+│   ├── format.js
+│   └── validation.js
+├── dashboard/           // 라우팅에 포함됨
+│   └── page.js
+└── page.js              // 라우팅에 포함됨
+```
+
+#### 사용 목적
+* 라우팅에 포함되지 않아야 하는 내부 컴포넌트 구성
+* 유틸리티 함수나 헬퍼 모듈 관리
+* UI 컴포넌트나 공통 기능을 논리적으로 그룹화
+* 앱 구조를 더 명확하게 조직화
+
+
+
 # 3.Page Router
 페이지 라우터는 Next.js의 전통적인 라우팅 시스템 방식이다. 파일기반으로 라우팅되며, pages 디렉토리 내의 파일 구조에 따라 자동으로 라우트가 생성된다. getStaticProps, getServerSideProps와 같은 데이터 패칭 메서드를 사용한다.
 
